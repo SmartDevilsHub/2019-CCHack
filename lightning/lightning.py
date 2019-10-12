@@ -20,6 +20,8 @@ import json
 import os
 import uuid
 
+# API to get IP by http://jsonip.com
+# API to get GEO by https://ipstack.com
 GEO_API_KEY = '433b8ba2a50ac91c3467ff415eadd729'
 
 class Lightning:
@@ -76,7 +78,8 @@ class Lightning:
             return self.get_cons()
 
     def get_geo(self):
-        url = f'http://api.ipstack.com/152.78.0.22?access_key={GEO_API_KEY}'
+        ip = json.loads( requests.get('http://jsonip.com').text )['ip']
+        url = f'http://api.ipstack.com/{ip}?access_key={GEO_API_KEY}'
         response = requests.get(url)
         response_dict = json.loads(response.text)
         return (response_dict['latitude'], response_dict['longitude'])
