@@ -9,15 +9,18 @@ diff  - 50
 
 # web imports
 import socket
-import sys
+import requests
 
 # symulation imports
 import random
 
 # other imports
+import sys
 import json
 import os
 import uuid
+
+GEO_API_KEY = '433b8ba2a50ac91c3467ff415eadd729'
 
 class Lightning:
     def __init__(self):
@@ -43,7 +46,7 @@ class Lightning:
         msg_dict = {
             'mac': str( uuid.getnode() ), # getnode() gets MAC address
             'cons': self.get_cons(),
-#            'geo': ..., # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            'geo': self.get_geo(),
         }
         msg_json_enc = json.dumps(msg_dict).encode()
         server_address = (self.main_frame_ip, self.main_frame_init_port)
@@ -71,6 +74,12 @@ class Lightning:
         except:
             print('Invalid input.\n')
             return self.get_cons()
+
+    def get_geo(self):
+        url = f'http://api.ipstack.com/152.78.0.22?access_key={GEO_API_KEY}'
+        response = requests.get(url)
+        response_dict = json.loads(response.text)
+        return (response_dict['latitude'], response_dict['longitude'])
 
 
 
