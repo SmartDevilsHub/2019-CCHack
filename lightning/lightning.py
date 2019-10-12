@@ -12,6 +12,8 @@ import socket
 import requests
 
 # symulation imports
+import battery
+import time
 import random
 
 # other imports
@@ -24,14 +26,14 @@ import uuid
 # API to get GEO by https://ipstack.com
 GEO_API_KEY = '433b8ba2a50ac91c3467ff415eadd729'
 
+MAIN_FRAME_IP = '165.22.125.102'
+MAIN_FRAME_PORT = 5005 
+
+DIFF_VALS = (-1, -1, -1, -1, -1)
+I = 0
+
 class Lightning:
     def __init__(self):
-        # lightning web setup
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.main_frame_init_port = 5005
-        self.main_frame_regular_port = 5505
-        self.main_frame_ip = '165.22.125.102'
-
         if os.path.exists('config.json'):
             with open('config.json', 'r') as config:
                 self.config = json.loads( config.read() )
@@ -39,26 +41,27 @@ class Lightning:
         else:
             self.config = self.get_config_from_main_frame()
 
-        # lightning const
-        self.power_storage_available = 50
-        self.power_stored = 0
+        self.battery = battery.Battery(50)
+        self.watch_and_alert(5)
 
     def get_config_from_main_frame(self):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # send data
         msg_dict = {
-            'mac': str( uuid.getnode() ), # getnode() gets MAC address
+            'type': 'init',
+            'mac': uuid.getnode(),
             'cons': self.get_cons(),
             'geo': self.get_geo(),
         }
         msg_json_enc = json.dumps(msg_dict).encode()
-        server_address = (self.main_frame_ip, self.main_frame_init_port)
+        server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)
         print( 'Sending {!r}.'.format(msg_json_enc) )
-        sent = self.sock.sendto(msg_json_enc, server_address)
+        sent = sock.sendto(msg_json_enc, server_address)
             # where sent is the num of bytes sent
 
         # receive response
-        print('Awaiting ID.')
-        data, server = self.sock.recvfrom(4096)
+        print('Awaiting response.')
+        data, server = sock.recvfrom(4096)
         config_json = data.decode('UTF-8')
         print('Settings file received.')
 
@@ -66,6 +69,7 @@ class Lightning:
         with open('config.json', 'w') as config:
             config.write(config_json)
 
+        sock.close()
         return json.loads(config_json)
 
     def get_cons(self):
@@ -78,6 +82,17 @@ class Lightning:
             return self.get_cons()
 
     def get_geo(self):
+        """
+        # manual geo input
+        try:
+            geo_input = input('Input latitude and longditude: ')
+            return [float(each) for each in geo_input.split()]
+        except:
+            print('Invalid input.\n')
+            return self.get_geo()
+        """
+
+        # autmatic geo detection
         ip = json.loads( requests.get('http://jsonip.com').text )['ip']
         url = f'http://api.ipstack.com/{ip}?access_key={GEO_API_KEY}'
         response = requests.get(url)
@@ -85,16 +100,50 @@ class Lightning:
         return (response_dict['latitude'], response_dict['longitude'])
 
 
+    def watch_and_alert(self, interval):
+        while True:
+            time.sleep(interval) # change wait to 60 (sec.)
+            diff = self.diff()
+            print(f'Diff: {diff}.')
+            if diff != 0:
+                alt_diff = self.battery.discharge_by( abs(diff) ) \
+                           if diff < 0 else \
+                           self.battery.charge_by(diff)
+                if alt_diff:
+                    self.alert_server(alt_diff)
 
-    def ren_hourly(self):
+    def alert_server(self, alt_diff):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)
+        msg_dict = {
+            'type': 'alert',
+            'msg': alt_diff,
+            'lightning_id': self.config['lightning_id'],
+        }
+        msg_json_enc = json.dumps(msg_dict).encode('UTF-8')
+        print( 'Sending {!r}.'.format(msg_json_enc) )
+        sent = sock.sendto(msg_json_enc, server_address)
+            # where sent is the num of bytes sent
+
+        # receive response
+        print('Awaiting response.')
+        data, server = sock.recvfrom(4096)
+        print(f'Got response to alert:\n{data}')
+        sock.close()
+
+    def prod(self):
         return random.randint(0, 100)
 
-    def cons_hourly(self):
-        return random.randint(0, 200)
+    def cons(self):
+        return random.randint(0, 150)
 
-    def diff_hourly(self):
-        return self.ren_hourly() - self.cons_hourly()
+    def diff(self):
+        return 20
+#        return self.prod() - self.cons()
 
     def route_energy(to, amount):
         print(f'Routing {amount} energy units to {to}')
+
+    def accept_energy(amount):
+        print(f'Accepting {amount} energy units')
 

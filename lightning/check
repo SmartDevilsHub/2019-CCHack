@@ -1,0 +1,5 @@
+if [ -f config.json ]; then
+    echo O - Initialized
+else
+    echo X - Not Initialized
+fi
