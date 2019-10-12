@@ -20,7 +20,8 @@ import json
 import os
 import uuid
 
-# API provided by https://ipstack.com
+# API to get IP by http://jsonip.com
+# API provided  by https://ipstack.com
 GEO_API_KEY = '433b8ba2a50ac91c3467ff415eadd729'
 
 class Lightning:
