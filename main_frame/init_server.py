@@ -46,7 +46,11 @@ def init_processor():
             auth_data = queue_item[0]
             c.execute(
                 "INSERT INTO device_table VALUES(NULL, '{}', {}, {}, {}, {}, {})".format(
-                    queue_item[1][0], 0, 0, auth_data['mac'], auth_data['geo'][0], auth_data['geo'][1]
+                    queue_item[1][0], # ip
+                    auth_data['mac'], # mac
+                    auth_data['geo'][0], # long
+                    auth_data['geo'][1], # lat
+                    queue_item[1][1] # port
                 )
             )
             c.execute("SELECT * FROM device_table")
@@ -58,6 +62,7 @@ def init_processor():
 
                     dist = haversine(house[5], house[6], auth_data['geo'][0], auth_data['geo'][1])
                     c.execute("INSERT INTO device_connections VALUES(NULL, {}, {}, {})".format(auth_data['lightning_id'], con, dist))
+                    light_net.add(auth_data['lightning_id'], con, dist)
 
                 except Exception as e:
                     print(e)
@@ -69,11 +74,26 @@ def init_processor():
 def alert_processor():
     while True:
         if alert_queue:
-
             queue_item = alert_queue.pop()
             auth_data = queue_item[0]
-            print("{} {} {}".format(auth_data['diff'], auth_data['stored'], auth_data['lightning_id']))
-            sock.sendto(json.dumps(auth_data).encode(), queue_item[1])
+
+            light_net.network[auth_data['lightning_id']].diff = auth_data['diff']
+            second_node = light_net.algo(auth_data['lightning_id'])
+            if auth_data > 0:
+                direc = True
+            else:
+                direc = False
+            pack_to_send = {"destination": second_node, "found": bool(second_node), "direction": direc, "amount": auth_data['diff']}
+            sock.sendto(json.dumps(pack_to_send).encode(), queue_item[1])
+            if second_node:
+                 print("second node found")
+                 conn = MySQLdb.connect(host='localhost', user='cchack', passwd='twentypasteight', db='cchack')
+                 c = conn.cursor()
+                 c.execute("SELECT IP, PORT FROM device_table WHERE ID={}".format(second_node))
+                 address = c.fetchone()
+                 pack_to_send = {"destination": auth_data['lightning_id']. "found": True, "direction": (not direc), "amount": auth_data['diff']}
+                 sock.sendto(json.dumps(pack_to_send).encode(), address)
+                 print("sent {}".format(pack_to_send))
 
 init_thread = threading.Thread(target=init_processor)
 alert_thread = threading.Thread(target=alert_processor)
