@@ -35,6 +35,10 @@ I = 0
 
 class Lightning:
     def __init__(self):
+
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.bind((MAIN_FRAME_IP, MAIN_FRAME_PORT))
+
         if os.path.exists('config.json'):
             with open('config.json', 'r') as config:
                 self.config = json.loads( config.read() )
@@ -44,10 +48,6 @@ class Lightning:
 
         self.battery = battery.Battery(50)
         self.watch_and_alert(5)
-
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind((MAIN_FRAME_IP, MAIN_FRAME_PORT))
-
         self.listen_thread = threading.Thread(target=self.listen_for_energy_change)
         self.listen_thread.start()
 

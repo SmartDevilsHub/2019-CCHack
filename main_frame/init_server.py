@@ -91,7 +91,7 @@ def alert_processor():
                  c = conn.cursor()
                  c.execute("SELECT IP, PORT FROM device_table WHERE ID={}".format(second_node))
                  address = c.fetchone()
-                 pack_to_send = {"destination": auth_data['lightning_id']. "found": True, "direction": (not direc), "amount": auth_data['diff']}
+                 pack_to_send = {"destination": auth_data['lightning_id'], "found": True, "direction": (not direc), "amount": auth_data['diff']}
                  sock.sendto(json.dumps(pack_to_send).encode(), address)
                  print("sent {}".format(pack_to_send))
 

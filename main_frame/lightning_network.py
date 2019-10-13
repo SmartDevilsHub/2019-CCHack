@@ -29,11 +29,11 @@ class LightningNetwork:
 			self.network[dev2].push_value(dev1, distance)
 	def add(self, dev1, dev2, distance):
 		if dev1 not in self.network:
-                        self.network[dev1] = LightningNode()
-                self.network[dev1].push_value(dev2, distance)
-                if dev2 not in self.network:
-                        self.network[dev2] = LightningNode()
-                self.network[dev2].push_value(dev1, distance)
+			self.network[dev1] = LightningNode()
+		self.network[dev1].push_value(dev2, distance)
+		if dev2 not in self.network:
+			self.network[dev2] = LightningNode()
+		self.network[dev2].push_value(dev1, distance)
 
 	def print_everything(self):
 		for key in self.network:
