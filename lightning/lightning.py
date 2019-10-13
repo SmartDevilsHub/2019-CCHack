@@ -131,10 +131,10 @@ class Lightning:
         msg_json_enc = json.dumps(msg_dict).encode('UTF-8')
         print( 'Sending {!r}.'.format(msg_json_enc) )
         sent = self.sock.sendto(msg_json_enc, server_address)
-            # where sent is the num of bytes sent
+        # where sent is the num of bytes sent
         # receive response
         print('Awaiting response.')
-        data, server = sock.recvfrom(4096)
+        data, server = self.sock.recvfrom(4096)
         packet = json.loads(data.decode('utf-8'))
         if packet['found']:
             if packet['direction']:
@@ -142,7 +142,6 @@ class Lightning:
             else:
                 self.accept_energy(packet['amount'], packet['destination'])
 
-        sock.close()
 
     def prod(self):
         return random.randint(0, 100)
