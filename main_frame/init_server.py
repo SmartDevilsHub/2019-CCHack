@@ -23,12 +23,13 @@ def haversine(lon1, lat1, lon2, lat2):
     return c * r
 
 from _thread import *
+from queue import Queue
 import threading
 from lightning_network import LightningNode, LightningNetwork
 
 
-init_queue = []
-alert_queue = []
+init_queue = Queue()
+alert_queue = Queue()
 light_net = LightningNetwork()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -41,8 +42,13 @@ def init_processor():
             print("going")
             conn = MySQLdb.connect(host='localhost', user='cchack', passwd='twentypasteight', db='cchack')
             c = conn.cursor()
-            auth_data = init_queue[0][0]
-            c.execute("INSERT INTO device_table VALUES(NULL, '{}', {}, {}, {}, {}, {})".format(init_queue[0][1][0], 0, 0, auth_data['mac'], auth_data['geo'][0], auth_data['geo'][1]))
+            queue_item = init_queue.pop()
+            auth_data = queue_item[0]
+            c.execute(
+                "INSERT INTO device_table VALUES(NULL, '{}', {}, {}, {}, {}, {})".format(
+                    queue_item[1][0], 0, 0, auth_data['mac'], auth_data['geo'][0], auth_data['geo'][1]
+                )
+            )
             c.execute("SELECT * FROM device_table")
             auth_data['lightning_id'] = "{}".format(c.fetchall()[-1][0])
             for con in auth_data['cons']:
@@ -56,18 +62,16 @@ def init_processor():
                 except Exception as e:
                     print(e)
 
-            sock.sendto(json.dumps(auth_data).encode(), init_queue[0][1])
+            sock.sendto(json.dumps(auth_data).encode(), queue_item[1]) # sending new config file with lightning_id
             conn.commit()
             conn.close()
-            del init_queue[0]
 
 def alert_processor():
     while True:
         if alert_queue:
-            auth_data = alert_queue[0][0]
+            auth_data = alert_queue.pop()[0]
             print("{} {} {}".format(auth_data['diff'], auth_data['stored'], auth_data['lightning_id']))
             sock.sendto(json.dumps(auth_data).encode(), alert_queue[0][1])
-            del alert_queue[0]
 
 init_thread = threading.Thread(target=init_processor)
 alert_thread = threading.Thread(target=alert_processor)
@@ -80,8 +84,8 @@ while True:
     print("{} recieved".format(data))
     json_data = json.loads(data.decode("utf-8"))
     if json_data['type'] == "init":
-        init_queue.append((json_data, address))
+        init_queue.push( (json_data, address) )
     elif json_data['type'] == "alert":
-        alert_queue.append((json_data, address))
+        alert_queue.push( (json_data, address) )
     print(init_queue)
     print(alert_queue)
