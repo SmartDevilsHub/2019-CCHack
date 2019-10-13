@@ -14,6 +14,6 @@ Every house that wants to be connected to the network, has to have a source of r
 
 * Main Frame Dev:       Nick   -- "Reverse Polish"
 * Mr Bridge:            Harry  -- "Potter??"
-* Mesh Redhead:         Bianca -- "Shall we just talk to the neighbours!?"
+* Mesh Redhead:         Bianca -- "Let's go kill'em!"
 * Humble Lightning Dev: Viktor -- "Saint Emperor"
 
