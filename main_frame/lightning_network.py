@@ -34,5 +34,3 @@ class LightningNetwork:
 		print(self.network.keys());
 
 
-ln = LightningNetwork()
-ln.print_everything()
