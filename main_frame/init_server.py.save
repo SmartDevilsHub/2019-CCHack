@@ -32,8 +32,6 @@ init_queue = Queue()
 alert_queue = Queue()
 light_net = LightningNetwork()
 
-light_net.print_everything()
-
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('165.22.125.102', 5005)
 sock.bind(server_address)
@@ -80,11 +78,10 @@ def alert_processor():
         if alert_queue:
             queue_item = alert_queue.pop()
             auth_data = queue_item[0]
-            if auth_data['lightning_id'] not in light_net.network:
-                light_net.network[auth_data['lightning_id']] = LightningNode()
+            if 
             light_net.network[auth_data['lightning_id']].diff = auth_data['diff']
-            second_node = light_net.algo(int(auth_data['lightning_id']))
-            if auth_data['diff'] > 0:
+            second_node = light_net.algo(auth_data['lightning_id'])
+            if auth_data > 0:
                 direc = True
             else:
                 direc = False
