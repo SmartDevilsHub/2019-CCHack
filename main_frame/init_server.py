@@ -44,8 +44,10 @@ def init_processor():
             c = conn.cursor()
             queue_item = init_queue.pop()
             auth_data = queue_item[0]
+            print(queue_item[0])
+            print(queue_item[1][1])
             c.execute(
-                "INSERT INTO device_table VALUES(NULL, '{}', {}, {}, {}, {}, {})".format(
+                "INSERT INTO device_table VALUES(NULL, '{}', {}, {}, {}, {})".format(
                     queue_item[1][0], # ip
                     auth_data['mac'], # mac
                     auth_data['geo'][0], # long
@@ -76,10 +78,11 @@ def alert_processor():
         if alert_queue:
             queue_item = alert_queue.pop()
             auth_data = queue_item[0]
-
+            if auth_data['lightning_id'] not in light_net.network:
+                light_net.network[auth_data['lightning_id']] = LightningNode()
             light_net.network[auth_data['lightning_id']].diff = auth_data['diff']
             second_node = light_net.algo(auth_data['lightning_id'])
-            if auth_data > 0:
+            if auth_data['diff'] > 0:
                 direc = True
             else:
                 direc = False
