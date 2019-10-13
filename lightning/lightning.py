@@ -21,6 +21,7 @@ import sys
 import json
 import os
 import uuid
+import threading
 
 # API to get IP by http://jsonip.com
 # API to get GEO by https://ipstack.com
@@ -44,8 +45,13 @@ class Lightning:
         self.battery = battery.Battery(50)
         self.watch_and_alert(5)
 
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.bind((MAIN_FRAME_IP, MAIN_FRAME_PORT))
+
+        self.listen_thread = threading.Thread(target=self.listen_for_energy_change)
+        self.listen_thread.start()
+
     def get_config_from_main_frame(self):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # send data
         msg_dict = {
             'type': 'init',
@@ -56,12 +62,12 @@ class Lightning:
         msg_json_enc = json.dumps(msg_dict).encode()
         server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)
         print( 'Sending {!r}.'.format(msg_json_enc) )
-        sent = sock.sendto(msg_json_enc, server_address)
+        sent = self.sock.sendto(msg_json_enc, server_address)
             # where sent is the num of bytes sent
 
         # receive response
         print('Awaiting response.')
-        data, server = sock.recvfrom(4096)
+        data, server = self.sock.recvfrom(4096)
         config_json = data.decode('UTF-8')
         print('Settings file received.')
 
@@ -69,7 +75,7 @@ class Lightning:
         with open('config.json', 'w') as config:
             config.write(config_json)
 
-        sock.close()
+        # sock.close()
         return json.loads(config_json)
 
     def get_cons(self):
@@ -113,8 +119,9 @@ class Lightning:
                     self.alert_server(alt_diff)
 
     def alert_server(self, alt_diff):
+        """
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)
+        server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)"""
         msg_dict = {
             'type': 'alert',
             'lightning_id': self.config['lightning_id'],
@@ -124,15 +131,15 @@ class Lightning:
         }
         msg_json_enc = json.dumps(msg_dict).encode('UTF-8')
         print( 'Sending {!r}.'.format(msg_json_enc) )
-        sent = sock.sendto(msg_json_enc, server_address)
+        sent = self.sock.sendto(msg_json_enc, server_address)
             # where sent is the num of bytes sent
-
+        """
         # receive response
         print('Awaiting response.')
         data, server = sock.recvfrom(4096)
         print(f'Got response to alert:\n{data}')
         sock.close()
-
+        """
     def prod(self):
         return random.randint(0, 100)
 
@@ -143,9 +150,23 @@ class Lightning:
         return 20
 #        return self.prod() - self.cons()
 
+    def listen_for_energy_change(self):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)
+        while True:
+            data, server = self.sock.recvfrom(4096)
+            packet = json.loads(data.decode('utf-8'))
+            if packet['found']:
+                if packet['direction']:
+                    self.route_energy(packet['amount'], packet['destination'])
+                else:
+                    self.accept_energy(packet['amount'], packet['destination'])
+
+    @staticmethod
     def route_energy(to, amount):
         print(f'Routing {amount} energy units to {to}')
 
-    def accept_energy(amount):
-        print(f'Accepting {amount} energy units')
+    @staticmethod
+    def accept_energy(amount, to):
+        print(f'Accepting {amount} energy units from {to}')
 
