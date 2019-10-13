@@ -39,7 +39,7 @@ class LightningNetwork:
 		visited.append(node)
 		if b == 0:
 			if not node in old_vis:
-			ret.append(node)
+				ret.append(node)
 		for next_n in self.network[node].neigh:
 			recu_algo(b-1, next_n, visited, ret, old_vis)
 
@@ -53,7 +53,7 @@ class LightningNetwork:
 			arg = []
 			ret = []
 			recu_algo(bredth, node, arg, ret, visited)
-			if !ret:
+			if not ret:
 				break
 			for val in ret:
 				comp = self.network[val].diff

@@ -69,9 +69,11 @@ def init_processor():
 def alert_processor():
     while True:
         if alert_queue:
-            auth_data = alert_queue.pop()[0]
+
+            queue_item = alert_queue.pop()
+            auth_data = queue_item[0]
             print("{} {} {}".format(auth_data['diff'], auth_data['stored'], auth_data['lightning_id']))
-            sock.sendto(json.dumps(auth_data).encode(), alert_queue[0][1])
+            sock.sendto(json.dumps(auth_data).encode(), queue_item[1])
 
 init_thread = threading.Thread(target=init_processor)
 alert_thread = threading.Thread(target=alert_processor)
