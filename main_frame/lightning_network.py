@@ -32,5 +32,34 @@ class LightningNetwork:
 			print("{} : ".format(key))
 			self.network[key].print()
 		print(self.network.keys());
+	def recu_algo(self, b, node, visited, ret, old_vis):
+		if node in visited:
+			return None
+		visited.append(node)
+		if b == 0:
+			if not node in old_vis:
+			ret.append(node)
+		for next_n in self.network[node].neigh:
+			recu_algo(b-1, next_n, visited, ret, old_vis)
+
+	def algo(self, node):
+		lookup = self.network[node].diff
+		if lookup == 0:
+			return None
+		visited = []
+		bredth = 1
+		while 1:
+			arg = []
+			ret = []
+			recu_algo(bredth, node, arg, ret, visited)
+			if !ret:
+				break
+			for val in ret:
+				comp = self.network[val].diff
+				if (lookup < 0 and comp > 0 and comp + lookup > 0) or (lookup > 0 and comp < 0 and comp + lookup < 0):
+					return val
+				visited.append()
+			bredth = bredth + 1
+
 
 
