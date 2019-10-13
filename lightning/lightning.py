@@ -117,8 +117,10 @@ class Lightning:
         server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)
         msg_dict = {
             'type': 'alert',
-            'msg': alt_diff,
             'lightning_id': self.config['lightning_id'],
+            'diff': alt_diff,
+            'stored': self.battery.amount_stored,
+            'capacity': self.battery.capacity,
         }
         msg_json_enc = json.dumps(msg_dict).encode('UTF-8')
         print( 'Sending {!r}.'.format(msg_json_enc) )
