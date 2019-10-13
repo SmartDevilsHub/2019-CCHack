@@ -13,6 +13,10 @@ Every house that wants to be connected to the network, has to have a source of r
 ## Authors
 
 Main Frame Dev:       Nick   -- "Reverse Polish"
+
 Mr Bridge:            Harry  -- "Potter??"
+
 Mesh Redhead:         Bianca -- "Shall we just talk to the neighbours!?"
+
 Humble Lightning Dev: Viktor -- "Saint Emperor"
+
