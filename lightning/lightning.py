@@ -119,8 +119,8 @@ class Lightning:
 
     def alert_server(self, alt_diff):
         """
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)"""
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)"""
+        server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)
         msg_dict = {
             'type': 'alert',
             'lightning_id': self.config['lightning_id'],
@@ -150,8 +150,8 @@ class Lightning:
 #        return self.prod() - self.cons()
 
     def listen_for_energy_change(self):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)
+        #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        #server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)
         while True:
             data, server = self.sock.recvfrom(4096)
             packet = json.loads(data.decode('utf-8'))
