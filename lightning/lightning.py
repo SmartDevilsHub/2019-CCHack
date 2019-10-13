@@ -132,13 +132,18 @@ class Lightning:
         print( 'Sending {!r}.'.format(msg_json_enc) )
         sent = self.sock.sendto(msg_json_enc, server_address)
             # where sent is the num of bytes sent
-        """
         # receive response
         print('Awaiting response.')
         data, server = sock.recvfrom(4096)
-        print(f'Got response to alert:\n{data}')
+        packet = json.loads(data.decode('utf-8'))
+        if packet['found']:
+            if packet['direction']:
+                self.route_energy(packet['amount'], packet['destination'])
+            else:
+                self.accept_energy(packet['amount'], packet['destination'])
+
         sock.close()
-        """
+
     def prod(self):
         return random.randint(0, 100)
 
@@ -148,7 +153,7 @@ class Lightning:
     def diff(self):
         return 20
 #        return self.prod() - self.cons()
-
+"""
     def listen_for_energy_change(self):
         #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         #server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)
@@ -160,7 +165,7 @@ class Lightning:
                     self.route_energy(packet['amount'], packet['destination'])
                 else:
                     self.accept_energy(packet['amount'], packet['destination'])
-
+"""
     @staticmethod
     def route_energy(to, amount):
         print(f'Routing {amount} energy units to {to}')
