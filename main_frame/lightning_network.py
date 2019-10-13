@@ -56,12 +56,11 @@ class LightningNetwork:
 			visited.append(var)
 			comp = self.network[var].diff
 			print("{} -> {} : {} -> {}".format(node, var, lookup, comp))
-			if lookup == comp * -1 and node != var:
+			if (lookup < 0 and comp > 0 and comp + lookup >= 0) or (lookup > 0 and comp < 0 and comp + lookup <= 0) and node != var:
 				return var
 			print(self.network[var].neigh)
 			for n in self.network[var].neigh:
 				modn = n[0]
-				print("Adding neighbor...")
 				toVisit.append(modn)
 				
 
