@@ -37,7 +37,6 @@ class Lightning:
     def __init__(self):
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind((MAIN_FRAME_IP, MAIN_FRAME_PORT))
 
         if os.path.exists('config.json'):
             with open('config.json', 'r') as config:
