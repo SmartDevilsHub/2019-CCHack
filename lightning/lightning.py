@@ -123,7 +123,7 @@ class Lightning:
         server_address = (MAIN_FRAME_IP, MAIN_FRAME_PORT)
         msg_dict = {
             'type': 'alert',
-            'lightning_id': self.config['lightning_id'],
+            'lightning_id': int(self.config['lightning_id']),
             'diff': alt_diff,
             'stored': self.battery.amount_stored,
             'capacity': self.battery.capacity,
@@ -136,7 +136,9 @@ class Lightning:
         print('Awaiting response.')
         data, server = self.sock.recvfrom(4096)
         packet = json.loads(data.decode('utf-8'))
-        if packet['found']:
+        print("Message recieved...")
+        print("{} - {}".format(packet['amount'], packet['destination']))
+        if packet['found'] and 0:
             if packet['direction']:
                 self.route_energy(packet['amount'], packet['destination'])
             else:
