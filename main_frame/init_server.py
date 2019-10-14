@@ -66,7 +66,7 @@ def init_processor():
 
                     dist = haversine(house[3], house[4], auth_data['geo'][0], auth_data['geo'][1])
                     c.execute("INSERT INTO device_connections VALUES(NULL, {}, {}, {})".format(auth_data['lightning_id'], con, dist))
-                    light_net.add(auth_data['lightning_id'], con, dist)
+                    light_net.add(int(auth_data['lightning_id']), int(con), dist)
 
                 except Exception as e:
                     print(e)
