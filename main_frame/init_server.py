@@ -64,7 +64,7 @@ def init_processor():
                     c.execute("SELECT * FROM  device_table WHERE ID={}".format(con))
                     house = c.fetchone()
 
-                    dist = haversine(house[5], house[6], auth_data['geo'][0], auth_data['geo'][1])
+                    dist = haversine(house[3], house[4], auth_data['geo'][0], auth_data['geo'][1])
                     c.execute("INSERT INTO device_connections VALUES(NULL, {}, {}, {})".format(auth_data['lightning_id'], con, dist))
                     light_net.add(auth_data['lightning_id'], con, dist)
 
