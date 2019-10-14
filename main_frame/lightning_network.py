@@ -2,6 +2,7 @@
 
 import MySQLdb
 
+
 class LightningNode:
 	def __init__(self):
 		self.diff = 0
